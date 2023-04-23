@@ -49,6 +49,8 @@ typedef struct processingParameters
     bool staticAssumption;
     bool staticAssumptionError;
     bool relativeError;
+    bool magnitudeThreshold;
+    double minMagnitude;
     bool absoluteValue;
 
     bool verbose;
@@ -94,6 +96,8 @@ int main(int argc, char *argv[])
     params.staticAssumption = false;
     params.staticAssumptionError = false;
     params.relativeError = false;
+    params.magnitudeThreshold = false;
+    params.minMagnitude = 0.0;
     params.absoluteValue = false;
     params.verbose = false;
     params.showFileProgress = true;
@@ -312,6 +316,17 @@ void parseCommandLine(ProcessingParameters *params, int argc, char *argv[])
                 exit(EXIT_FAILURE);
             }
             params->referenceSatellite = atoi(argv[i] + 26);
+        }
+        else if (strncmp("--minimum-magnitude=", argv[i], 20)==0)
+        {
+            params->nOptions++;
+            params->magnitudeThreshold = true;
+            if (strlen(argv[i]) < 20)
+            {
+                fprintf(stderr, "Unable to parse %s\n", argv[i]);
+                exit(EXIT_FAILURE);
+            }
+            params->minMagnitude = atof(argv[i] + 20);
         }
         else if (strcmp("--relative-error", argv[i])==0)
         {
@@ -588,7 +603,11 @@ int processFile(char *filename, ProcessingParameters *params)
                     {
                         value = params->spaceSeries.points[i].staticAssumptionErrors[params->referenceSatellite];
                         if (params->relativeError)
+                        {
                             value = value / params->spaceSeries.points[i].param;
+                            if (params->magnitudeThreshold && (fabs(params->spaceSeries.points[i].param) < params->minMagnitude)
+                                includeValue = false;
+                        }
                     }
                     else
                         value = NAN;

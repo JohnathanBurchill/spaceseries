@@ -592,7 +592,9 @@ int processFile(char *filename, ProcessingParameters *params)
                     qdDirection = 0.0;
                 lastQdLat = qdlat;
 
-                if (params->binningState.flipParamWhenDescending && qdDirection < 0.0)
+                if (params->absoluteValue)
+                    value = fabs(value);
+                else if (params->binningState.flipParamWhenDescending && qdDirection < 0.0)
                     value = -value;
                 params->binningState.nValsRead++;
                 binData(&params->binningState, qdlat, mlt, value, includeValue);

@@ -48,6 +48,7 @@ typedef struct processingParameters
     bool timeDerivative;
     bool staticAssumption;
     bool staticAssumptionError;
+    bool absoluteValue;
 
     bool verbose;
     bool showFileProgress;
@@ -90,6 +91,7 @@ int main(int argc, char *argv[])
     params.referenceSatellite = -1;
     params.timeDerivative = false;
     params.staticAssumption = false;
+    params.staticAssumptionError = false;
     params.staticAssumptionError = false;
     params.verbose = false;
     params.showFileProgress = true;
@@ -281,6 +283,11 @@ void parseCommandLine(ProcessingParameters *params, int argc, char *argv[])
         {
             params->nOptions++;
             params->timeDerivative = true;
+        }
+        else if (strcmp("--absolute-value", argv[i])==0)
+        {
+            params->nOptions++;
+            params->absoluteValue = true;
         }
         else if (strncmp("--static-assumption=", argv[i], 20)==0)
         {
@@ -553,7 +560,9 @@ int processFile(char *filename, ProcessingParameters *params)
                 qdDirection = 0.0;
             lastQdLat = qdlat;
 
-            if (params->binningState.flipParamWhenDescending && qdDirection < 0.0)
+            if (params->absoluteValue)
+                value = fabs(value);
+            else if (params->binningState.flipParamWhenDescending && qdDirection < 0.0)
                 value = -value;
             params->binningState.nValsRead++;
             binData(&params->binningState, qdlat, mlt, value, includeValue);

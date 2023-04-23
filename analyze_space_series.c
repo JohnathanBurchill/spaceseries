@@ -48,6 +48,7 @@ typedef struct processingParameters
     bool timeDerivative;
     bool staticAssumption;
     bool staticAssumptionError;
+    bool relativeError;
     bool absoluteValue;
 
     bool verbose;
@@ -92,7 +93,8 @@ int main(int argc, char *argv[])
     params.timeDerivative = false;
     params.staticAssumption = false;
     params.staticAssumptionError = false;
-    params.staticAssumptionError = false;
+    params.relativeError = false;
+    params.absoluteValue = false;
     params.verbose = false;
     params.showFileProgress = true;
     params.binaryDirectory = ".";
@@ -310,6 +312,11 @@ void parseCommandLine(ProcessingParameters *params, int argc, char *argv[])
                 exit(EXIT_FAILURE);
             }
             params->referenceSatellite = atoi(argv[i] + 26);
+        }
+        else if (strcmp("--relative-error", argv[i])==0)
+        {
+            params->nOptions++;
+            params->relativeError = true;
         }
         else if (strcmp(argv[i], "--available-statistics") == 0)
         {
@@ -564,6 +571,7 @@ int processFile(char *filename, ProcessingParameters *params)
                 value = fabs(value);
             else if (params->binningState.flipParamWhenDescending && qdDirection < 0.0)
                 value = -value;
+
             params->binningState.nValsRead++;
             binData(&params->binningState, qdlat, mlt, value, includeValue);
         }
@@ -577,7 +585,11 @@ int processFile(char *filename, ProcessingParameters *params)
                 else if (params->staticAssumptionError)
                 {
                     if (params->referenceSatellite < params->spaceSeries.header.nTimeSeriesPoints)
+                    {
                         value = params->spaceSeries.points[i].staticAssumptionErrors[params->referenceSatellite];
+                        if (params->relativeError)
+                            value = value / params->spaceSeries.points[i].param;
+                    }
                     else
                         value = NAN;
                 }

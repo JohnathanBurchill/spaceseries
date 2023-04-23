@@ -605,7 +605,7 @@ int processFile(char *filename, ProcessingParameters *params)
                         if (params->relativeError)
                         {
                             value = value / params->spaceSeries.points[i].param;
-                            if (params->magnitudeThreshold && (fabs(params->spaceSeries.points[i].param) < params->minMagnitude)
+                            if (params->magnitudeThreshold && (fabs(params->spaceSeries.points[i].param) < params->minMagnitude))
                                 includeValue = false;
                         }
                     }

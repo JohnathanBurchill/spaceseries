@@ -553,9 +553,6 @@ int processFile(char *filename, ProcessingParameters *params)
     status = SPACESERIES_OK;
     float qdDirection = 0.0;
 
-    // TODO allow thresholds to exclude values
-    includeValue = true;
-
     while (true)
     {
         status = readSpaceSeries(binfd, &params->spaceSeries);
@@ -588,11 +585,15 @@ int processFile(char *filename, ProcessingParameters *params)
                 value = -value;
 
             params->binningState.nValsRead++;
+            // TODO allow thresholds to filter values
+            includeValue = true;
             binData(&params->binningState, qdlat, mlt, value, includeValue);
         }
         else
             for (int i = 0; i < params->spaceSeries.header.nSpaceSeriesPoints; i++)
             {
+                // TODO allow thresholds to filter values
+                includeValue = true;
                 if (params->timeDerivative)
                 {
                     value = params->spaceSeries.points[i].dparamdt;

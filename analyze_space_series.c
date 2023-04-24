@@ -49,7 +49,7 @@ typedef struct processingParameters
     bool staticAssumption;
     bool staticAssumptionError;
     bool relativeError;
-    bool reciprocalError;
+    bool errorIsRelativeToStaticCase;
     bool magnitudeThreshold;
     double minMagnitude;
     bool absoluteValue;
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
     params.staticAssumption = false;
     params.staticAssumptionError = false;
     params.relativeError = false;
-    params.reciprocalError = false;
+    params.errorIsRelativeToStaticCase = false;
     params.magnitudeThreshold = false;
     params.minMagnitude = 0.0;
     params.absoluteValue = false;
@@ -238,6 +238,9 @@ void usage(char *name)
     fprintf(stdout, "%35s - %s\n", "--time-derivative", "get statistic of the time derivative");
     fprintf(stdout, "%35s - %s\n", "--static-assumption=<satnum>", "get statistic of the result from assuming <satnmu> traversed a static structure");
     fprintf(stdout, "%35s - %s\n", "--static-assumption-error=<satnum>", "get statistic of the change in static estimate for <satnum> with respect to the space series value");
+    fprintf(stdout, "%35s - %s\n", "--relative-error", "calculate fractional error in static assumption relative to space series estimate.");
+    fprintf(stdout, "%35s - %s\n", "--minimum-magnitude=<threshold>", "include only values greater than <threshold> in relative error calculations");
+    fprintf(stdout, "%35s - %s\n", "--absolute-value", "calculate statistics of the absolute value of the requested parameter");
     fprintf(stdout, "%35s - %s\n", "--available-statistics", "print list of supported statistics");
     fprintf(stdout, "%35s - %s\n", "--no-file-progress", "suppress printing file progress");
     fprintf(stdout, "%35s - %s\n", "--equal-length-bins", "use standing binning rather than equal-area");
@@ -335,10 +338,10 @@ void parseCommandLine(ProcessingParameters *params, int argc, char *argv[])
             params->nOptions++;
             params->relativeError = true;
         }
-        else if (strcmp("--reciprocal-error", argv[i])==0)
+        else if (strcmp("--error-reference-is-static-case", argv[i])==0)
         {
             params->nOptions++;
-            params->reciprocalError = true;
+            params->errorIsRelativeToStaticCase = true;
         }
         else if (strcmp(argv[i], "--available-statistics") == 0)
         {
@@ -532,6 +535,9 @@ int processFile(char *filename, ProcessingParameters *params)
     float qdlat = 0.0;
     float lastQdLat = 0.0;
     float value = 0.0;
+    float staticValue = 0.0;
+    float staticError = 0.0;
+    float spaceSeriesValue = 0.0;
     bool includeValue = false;
 
     ssize_t bytesRead = 0;
@@ -609,19 +615,23 @@ int processFile(char *filename, ProcessingParameters *params)
                 {
                     if (params->referenceSatellite < params->spaceSeries.header.nTimeSeriesPoints)
                     {
-                        value = params->spaceSeries.points[i].staticAssumptionErrors[params->referenceSatellite];
+                        // This is the static value minus the space series value
+                        staticError = params->spaceSeries.points[i].staticAssumptionErrors[params->referenceSatellite];
+                        value = staticError;
+                        spaceSeriesValue = params->spaceSeries.points[i].param;
+                        staticValue = staticError + spaceSeriesValue;
                         if (params->relativeError)
                         {
-                            if (params->reciprocalError)
+                            if (params->errorIsRelativeToStaticCase)
                             {
-                                value = params->spaceSeries.points[i].param / value;
-                                if (params->magnitudeThreshold && (fabs(value) < params->minMagnitude))
+                                value = (spaceSeriesValue - staticValue) / (staticValue);
+                                if (params->magnitudeThreshold && (fabs(staticValue) < params->minMagnitude))
                                     includeValue = false;
                             }
                             else
                             {
-                                value = value / params->spaceSeries.points[i].param;
-                                if (params->magnitudeThreshold && (fabs(params->spaceSeries.points[i].param) < params->minMagnitude))
+                                value = staticError / spaceSeriesValue;
+                                if (params->magnitudeThreshold && (fabs(spaceSeriesValue) < params->minMagnitude))
                                     includeValue = false;
                             }
                         }

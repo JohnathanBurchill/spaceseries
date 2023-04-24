@@ -241,6 +241,7 @@ void usage(char *name)
     fprintf(stdout, "%35s - %s\n", "--relative-error", "calculate fractional error in static assumption relative to space series estimate.");
     fprintf(stdout, "%35s - %s\n", "--minimum-magnitude=<threshold>", "include only values greater than <threshold> in relative error calculations");
     fprintf(stdout, "%35s - %s\n", "--absolute-value", "calculate statistics of the absolute value of the requested parameter");
+    fprintf(stdout, "%35s - %s\n", "--error-reference-is-static-case", "calculate relative change in static value using the space series estimate");
     fprintf(stdout, "%35s - %s\n", "--available-statistics", "print list of supported statistics");
     fprintf(stdout, "%35s - %s\n", "--no-file-progress", "suppress printing file progress");
     fprintf(stdout, "%35s - %s\n", "--equal-length-bins", "use standing binning rather than equal-area");

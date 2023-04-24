@@ -49,6 +49,7 @@ typedef struct processingParameters
     bool staticAssumption;
     bool staticAssumptionError;
     bool relativeError;
+    bool reciprocalError;
     bool magnitudeThreshold;
     double minMagnitude;
     bool absoluteValue;
@@ -96,6 +97,7 @@ int main(int argc, char *argv[])
     params.staticAssumption = false;
     params.staticAssumptionError = false;
     params.relativeError = false;
+    params.reciprocalError = false;
     params.magnitudeThreshold = false;
     params.minMagnitude = 0.0;
     params.absoluteValue = false;
@@ -332,6 +334,11 @@ void parseCommandLine(ProcessingParameters *params, int argc, char *argv[])
         {
             params->nOptions++;
             params->relativeError = true;
+        }
+        else if (strcmp("--reciprocal-error", argv[i])==0)
+        {
+            params->nOptions++;
+            params->reciprocalError = true;
         }
         else if (strcmp(argv[i], "--available-statistics") == 0)
         {
@@ -605,9 +612,18 @@ int processFile(char *filename, ProcessingParameters *params)
                         value = params->spaceSeries.points[i].staticAssumptionErrors[params->referenceSatellite];
                         if (params->relativeError)
                         {
-                            value = value / params->spaceSeries.points[i].param;
-                            if (params->magnitudeThreshold && (fabs(params->spaceSeries.points[i].param) < params->minMagnitude))
-                                includeValue = false;
+                            if (params->reciprocalError)
+                            {
+                                value = params->spaceSeries.points[i].param / value;
+                                if (params->magnitudeThreshold && (fabs(value) < params->minMagnitude))
+                                    includeValue = false;
+                            }
+                            else
+                            {
+                                value = value / params->spaceSeries.points[i].param;
+                                if (params->magnitudeThreshold && (fabs(params->spaceSeries.points[i].param) < params->minMagnitude))
+                                    includeValue = false;
+                            }
                         }
                     }
                     else

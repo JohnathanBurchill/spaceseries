@@ -76,6 +76,8 @@ typedef struct processingParameters
     long nSpaceSeries;
     long nFileSpaceSeries;
 
+    bool satelliteSeparation;
+
 } ProcessingParameters;
 
 
@@ -252,6 +254,7 @@ void usage(char *name)
     fprintf(stdout, "%35s - %s\n", "--mltmax=<value>", "maximum magnetic local time");
     fprintf(stdout, "%35s - %s\n", "--deltamlt=<value>", "magnetic local time bin width (at the polar cap if for equal-area binning)");
     fprintf(stdout, "%35s - %s\n", "--flip-when-descending", "change sign of value when on descending part of orbit");
+    fprintf(stdout, "%35s - %s\n", "--mean-along-track-separation", "calculate requested statistic of the mean along-track separation of the trailing satellites with respect to the lead satellite");
     fprintf(stdout, "%35s - %s\n", "--binary-input-directory=<dir>", "path to directory containing binary input files");
 
     return;
@@ -431,6 +434,11 @@ void parseCommandLine(ProcessingParameters *params, int argc, char *argv[])
             params->nOptions++;
             params->binningState.flipParamWhenDescending = true;
         }
+        else if (strcmp(argv[i], "--mean-along-track-separation") == 0)
+        {
+            params->nOptions++;
+            params->satelliteSeparation = true;
+        }
         else if (strncmp(argv[i], "--binary-input-directory=", 25) == 0)
         {
             params->nOptions++;
@@ -584,7 +592,23 @@ int processFile(char *filename, ProcessingParameters *params)
         // Calculate space series statistic
         if (params->staticAssumption && params->referenceSatellite < params->spaceSeries.header.nTimeSeriesPoints)
         {
-            value = params->spaceSeries.header.satelliteTimeSeriesPoint[params->referenceSatellite].staticParam;
+            if (params->satelliteSeparation)
+            {
+                int nSats = params->spaceSeries.header.nSpaceSeriesPoints;
+                value = 0.0;
+                for (int s = 1; s < nSats; s++)
+                {
+                    value += params->spaceSeries.header.satelliteTimeSeriesPoint[s].alongTrackDisplacement;
+                }
+                if (nSats > 1)
+                {
+                    value /= (float) (nSats - 1);
+                }
+            }
+            else
+            {
+                value = params->spaceSeries.header.satelliteTimeSeriesPoint[params->referenceSatellite].staticParam;
+            }
             qdlat = params->spaceSeries.header.satelliteTimeSeriesPoint[params->referenceSatellite].qdLatitude;
             mlt = params->spaceSeries.header.satelliteTimeSeriesPoint[params->referenceSatellite].mlt;
             if (params->nFileSpaceSeries > 1)

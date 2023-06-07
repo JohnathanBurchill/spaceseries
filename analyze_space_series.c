@@ -636,6 +636,20 @@ int processFile(char *filename, ProcessingParameters *params)
                 {
                     value = params->spaceSeries.points[i].dparamdt;
                 }
+                else if (params->satelliteSeparation)
+                {
+                    // Will be the same mean separation for all space series at this time
+                    int nSats = params->spaceSeries.header.nSpaceSeriesPoints;
+                    value = 0.0;
+                    for (int s = 1; s < nSats; s++)
+                    {
+                        value += params->spaceSeries.header.satelliteTimeSeriesPoint[s].alongTrackDisplacement;
+                    }
+                    if (nSats > 1)
+                    {
+                        value /= (float) (nSats - 1);
+                    }
+                }
                 else if (params->staticAssumptionError)
                 {
                     if (params->referenceSatellite < params->spaceSeries.header.nTimeSeriesPoints)

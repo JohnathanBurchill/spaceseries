@@ -639,7 +639,7 @@ int processFile(char *filename, ProcessingParameters *params)
                 else if (params->satelliteSeparation)
                 {
                     // Will be the same mean separation for all space series at this time
-                    int nSats = params->spaceSeries.header.nSpaceSeriesPoints;
+                    int nSats = params->spaceSeries.header.nTimeSeriesPoints;
                     value = 0.0;
                     for (int s = 1; s < nSats; s++)
                     {

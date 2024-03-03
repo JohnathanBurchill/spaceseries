@@ -2,7 +2,7 @@
 
     spaceseries: programstate.c
 
-    Copyright (C) 2023  Johnathan K Burchill
+    Copyright (C) 2024  Johnathan K Burchill
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ void initProgramState(ProgramState *state)
     state->splitOutputFilesByOrbit = true;
     state->labelOutputFileOrbits = true;
     state->qdDataFile = "apexsh.dat";
+    state->tctDataset = "_TCT02";
     return;
 }
 

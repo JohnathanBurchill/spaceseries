@@ -2,7 +2,7 @@
 
     spaceseries: parseargs.c
 
-    Copyright (C) 2023  Johnathan K Burchill
+    Copyright (C) 2024  Johnathan K Burchill
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@
 void parseArgs(ProgramState *state, int argc, char *argv[])
 {
     int status = SPACESERIES_OK;
-    
+
     for (int i = 0; i < argc; i++)
     {
         if (strcmp("--about", argv[i])==0)
@@ -46,6 +46,12 @@ void parseArgs(ProgramState *state, int argc, char *argv[])
         {
             usage(argv[0]);
             exit(EXIT_SUCCESS);
+        }
+        else if (strcmp("--tct-16hz", argv[i]) == 0)
+        {
+            state->nOptions++;
+            state->tctDataset = "_TCT16";
+            state->samplePeriod = 1.0/16.;
         }
         else if (strncmp("--qd-data-file=", argv[i], 15) == 0)
         {

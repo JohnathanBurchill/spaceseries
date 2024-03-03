@@ -2,7 +2,7 @@
 
     spaceseries: data.c
 
-    Copyright (C) 2023  Johnathan K Burchill
+    Copyright (C) 2024  Johnathan K Burchill
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -185,7 +185,7 @@ int loadSatelliteData(ProgramState *state, char *measurementParameter, int satel
     e = fts_read(fts);
     while (e)
     {
-        if ((e->fts_namelen == 59) && (strcmp(".cdf", e->fts_name + e->fts_namelen - 4) == 0) && (*(e->fts_name + 11) == swarmData->satellite[strlen(swarmData->satellite)-1]) && (strncmp("_TCT02", e->fts_name + 12, 6) == 0) && (strncmp(firstDateStr, e->fts_name + 19, 8) == 0) && (strncmp(firstTimeStr, e->fts_name+28, 6)>=0) && (strncmp(lastTimeStr, e->fts_name+44, 6)<=0))
+        if ((e->fts_namelen == 59) && (strcmp(".cdf", e->fts_name + e->fts_namelen - 4) == 0) && (*(e->fts_name + 11) == swarmData->satellite[strlen(swarmData->satellite)-1]) && (strncmp(state->tctDataset, e->fts_name + 12, 6) == 0) && (strncmp(firstDateStr, e->fts_name + 19, 8) == 0) && (strncmp(firstTimeStr, e->fts_name+28, 6)>=0) && (strncmp(lastTimeStr, e->fts_name+44, 6)<=0))
         {
             cdfstatus = CDFopen(e->fts_path, &cdf);
             if (cdfstatus != CDF_OK)
@@ -211,6 +211,7 @@ int loadSatelliteData(ProgramState *state, char *measurementParameter, int satel
             {
                 loadVariable(measurementParameter, cdf, firstRec, lastRec, (void**)&(swarmData->parameter), &(swarmData->nMeasurements));
                 gotParameter = true;
+                gotEphemeres = true;
             }
             CDFclose(cdf);
 
@@ -250,7 +251,7 @@ int loadSatelliteData(ProgramState *state, char *measurementParameter, int satel
             return status;
         }
         // Interpolate to times and store data
-        double sampleIntervalMs = 500; // 2 Hz like TCT dataset
+        double sampleIntervalMs = state->samplePeriod * 1000.0; // 
         ssize_t nSamples = (ssize_t)floor((state->lastTime - state->firstTime) / sampleIntervalMs);
         if (nSamples <= 1)
         {
@@ -1151,8 +1152,17 @@ void calculateAlongTrackDistances(ProgramState *state)
         for (int n = 1; n < sat->nMeasurements; n++)
         {
             interSatelliteDistanceKm(state->data.satelliteData[0], n, sat, n, NULL, &alongTrackDisplacement, NULL, NULL);
-            totalDistance = (double)state->data.satelliteData[0]->distanceAlongTrack[n] + alongTrackDisplacement;
-            sat->distanceAlongTrack[n] = (float)totalDistance;
+            if (!isfinite(alongTrackDisplacement))
+            {
+                // Cannot analyze data beyond this point
+                sat->nMeasurements = n-1;
+                break;
+            }
+            else 
+            {
+                totalDistance = (double)state->data.satelliteData[0]->distanceAlongTrack[n] + alongTrackDisplacement;
+                sat->distanceAlongTrack[n] = (float)totalDistance;
+            }
         }
     }
 

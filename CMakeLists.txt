@@ -1,6 +1,6 @@
 # spaceseries: CMakeLists.txt
 
-# Copyright (C) 2023  Johnathan K Burchill
+# Copyright (C) 2024  Johnathan K Burchill
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,6 +19,8 @@
 PROJECT(spaceseries)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.3)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 ADD_DEFINITIONS(-DHAVE_GETOPT_H)
 

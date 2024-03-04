@@ -347,8 +347,8 @@ float interpolateAtDistance(Data *data, int satelliteIndex, float requestedDista
     SwarmData *sat = NULL;
     sat = data->satelliteData[satelliteIndex];
     neighboringDistanceIndices(requestedDistance, sat);
-    size_t i1 = sat->i1;
-    size_t i2 = sat->i2;
+    ssize_t i1 = sat->i1;
+    ssize_t i2 = sat->i2;
     if (i1 < 0 || i2 < 0)
     {
         *time = -1.0;

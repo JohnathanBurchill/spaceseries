@@ -193,7 +193,7 @@ void interpolate(Data *data, double tMilliseconds, float requestedDistance, bool
             *mlt = -INFINITY;
         if (qdargoforbit != NULL)
             *qdargoforbit = -INFINITY;
-            return;
+        return;
     }
     if (tMilliseconds > tmax)
     {
@@ -210,7 +210,7 @@ void interpolate(Data *data, double tMilliseconds, float requestedDistance, bool
             *mlt = INFINITY;
         if (qdargoforbit != NULL)
             *qdargoforbit = INFINITY;
-            return;
+        return;
     }
 
     if (t0 <= tMilliseconds && tMilliseconds < t1)

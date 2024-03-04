@@ -52,7 +52,7 @@ int loadData(ProgramState *state)
 int loadParameterData(ProgramState *state, char *measurementParameter)
 {
 
-    if (state == NULL || state->parameterOffsets == NULL || measurementParameter == NULL || state->directories.c7hDir == NULL || state->directories.modDir == NULL || state->directories.tctDir == NULL || state->directories.lpDir == NULL)
+    if (state == NULL || measurementParameter == NULL || state->directories.c7hDir == NULL || state->directories.modDir == NULL || state->directories.tctDir == NULL || state->directories.lpDir == NULL)
         return SPACESERIES_POINTERS;
 
     // TII cross-track ion drift and magnetic field residual files should be

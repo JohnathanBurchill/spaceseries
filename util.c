@@ -283,18 +283,27 @@ int openOutputFile(ProgramState *state)
         for (int i = 0; i < data->nSatellites; i++)
             fprintf(state->output, " %s -%.1f s -%.1f km;", data->satelliteData[i]->satellite, data->initialTimeLag[i], data->initialDistanceLag[i]);
         fprintf(state->output, "\n");
-        fprintf(state->output, "time (ms from 0000-01-01T00:00:00.000) distance along track (km) latitude (deg) longitude (deg) radius (m) QDLatitude (deg) MLT (hours) QDArgOfORbit (deg) %s (units from source CDF) d(%s)/dt (units per second)", state->measurementParameter, state->measurementParameter);
+        fprintf(state->output, "Space series consist of a header for each time, and one or more space series points.\n");
+        fprintf(state->output, "Headers: <time (ms from 0000-01-01T00:00:00.000)> <number of points in series>, and the following on the same line:\n");
         for (int s = 0; s < data->nSatellites; s++)
         {
-            fprintf(state->output, " latitude %s (deg)", data->satelliteData[s]->satellite);
-            fprintf(state->output, " longitude %s (deg)", data->satelliteData[s]->satellite);
-            fprintf(state->output, " radius %s (m)", data->satelliteData[s]->satellite);
-            fprintf(state->output, " distance along track %s (km)", data->satelliteData[s]->satellite);
-            fprintf(state->output, " QDLatitude %s (deg)", data->satelliteData[s]->satellite);
-            fprintf(state->output, " MLT %s (hours)", data->satelliteData[s]->satellite);
-            fprintf(state->output, " QDArgOfOrbit %s (deg)", data->satelliteData[s]->satellite);
-            fprintf(state->output, " static %s %s (km)", state->measurementParameter, data->satelliteData[s]->satellite);
-            fprintf(state->output, " delta %s (dynamic - static) %s (km)", state->measurementParameter, data->satelliteData[s]->satellite);
+            fprintf(state->output, " %s:", data->satelliteData[s]->satellite);
+            fprintf(state->output, " <Lat (deg)>");
+            fprintf(state->output, " <Lon (deg)>");
+            fprintf(state->output, " <Rad (m)>");
+            fprintf(state->output, " <Along track distance (km)>");
+            fprintf(state->output, " <QDLat (deg)>");
+            fprintf(state->output, " <MLT (hours)>");
+            fprintf(state->output, " <QDArgOfOrbit (deg)>");
+            fprintf(state->output, " <Along-track displacement (km)>");
+            fprintf(state->output, " <Horizontal cross-track displacement (km)>");
+            fprintf(state->output, " <Vertical cross-track displacement (km)>");
+            fprintf(state->output, " <static %s (km)>", state->measurementParameter);
+        }
+        fprintf(state->output, "Series point, one per line: <time (ms from 0000-01-01T00:00:00.000)> <distance along track (km)> <latitude (deg)> <longitude (deg)> <radius (m)> <QDLatitude (deg)> <MLT (hours)> <QDArgOfORbit (deg)> <%s (units from source CDF)> <d(%s)/dt (units per second)>", state->measurementParameter, state->measurementParameter);
+        for (int s = 0; s < data->nSatellites; s++)
+        {
+            fprintf(state->output, " <delta %s (dynamic - static) %s (km)>", state->measurementParameter, state->data.satelliteData[s]->satellite);
         }
         fprintf(state->output, "\n");
     }
